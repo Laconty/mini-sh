@@ -7,9 +7,9 @@
 
 // ARRAY OF pointers to FUNCTIONS whose PARAM is (char **) and RETURN int
 int (*builtin_func[]) (char **) = {
-  &lsh_cd,
-  &lsh_help,
-  &lsh_exit
+  &msh_cd,
+  &msh_help,
+  &msh_exit
 };
 
 char *builtin_str[] = {
@@ -18,39 +18,42 @@ char *builtin_str[] = {
   "exit"
 };
 
-int lsh_num_builtins() {
+int msh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
 };
 
-int lsh_cd (char **args) {
+int msh_cd (char **args) {
   if (args[1] == NULL) {
-    fprintf(stderr, "lsh: expected argument to \"cd\"\n");
+    fprintf(stderr, "msh: expected argument to \"cd\"\n");
   } else {
     if (chdir(args[1]) != 0) {
-      perror("lsh");
+      perror("msh");
     }
   }
   
   return 1;
 }
 
-int lsh_help (char **args) {
-  printf("Mini shell implementation\n");
-  printf("Type program names and arguments, and hit enter.\n");
-  printf("The following are built in:\n");
+int msh_help (char **args) {
+  printf("\n");
+  printf(" Mini shell implementation\n");
+  printf(" Type program name and arguments, and hit enter.\n");
+  printf(" The following are built in:\n");
   
-  for (int i = 0; i < lsh_num_builtins(); ++i) {
+  for (int i = 0; i < msh_num_builtins(); ++i) {
     printf("  %s\n", builtin_str[i]);
   }
+  
+  printf("\n");
   
   return 1;
 }
 
-int lsh_exit (char **args) {
+int msh_exit (char **args) {
   return 0;
 }
 
-int lsh_launch (char **args) {
+int msh_launch (char **args) {
   pid_t pid;
   int status;
   
@@ -58,13 +61,13 @@ int lsh_launch (char **args) {
   if (pid == 0) {
     // Child process
     if (execvp(args[0], args) == -1) {
-      perror("lsh");
+      perror("msh");
     }
     
     exit(EXIT_FAILURE);
   } else if (pid < 0) {
     // Error forking
-    perror("lsh");
+    perror("msh");
   } else {
     // Parent process
     do {
@@ -75,7 +78,7 @@ int lsh_launch (char **args) {
   return 1;
 }
 
-int lsh_execute (char **args) {
+int msh_execute (char **args) {
   int i;
   
   if (args[0] == NULL) {
@@ -83,39 +86,44 @@ int lsh_execute (char **args) {
     return 1;
   }
   
-  for (i = 0; i < lsh_num_builtins(); ++i) {
+  for (i = 0; i < msh_num_builtins(); ++i) {
     if (strcmp(args[0], builtin_str[i]) == 0) {
       return (*builtin_func[i])(args);
     }
   }
   
-  return lsh_launch(args);
+  return msh_launch(args);
 }
 
-void lsh_loop (void) {
+void msh_loop (void) {
   char *line;
   char **args;
   int status;
+  char cwd[1024];
   
   do {
-    printf("> ");
-    line = lsh_read_line();
-    args = lsh_split_line(line);
-    status = lsh_execute(args);
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+      perror("msh: getcwd() error");
+      exit(EXIT_FAILURE);
+    }
+    printf("%s> ", cwd);
+    line = msh_read_line();
+    args = msh_split_line(line);
+    status = msh_execute(args);
     
     free(line);
     free(args);
   } while (status);
 }
 
-char *lsh_read_line (void) {
-  int bufsize = LSH_RL_BUFSIZE;
+char *msh_read_line (void) {
+  int bufsize = MSH_RL_BUFSIZE;
   int position = 0;
   char *buffer = malloc(sizeof(char) * bufsize);
   int c;
   
   if (buffer == NULL) {
-    fprintf(stderr, "lsh: allocation error\n");
+    fprintf(stderr, "msh: allocation error\n");
     exit(EXIT_FAILURE);
   }
   
@@ -132,10 +140,10 @@ char *lsh_read_line (void) {
     position++;
     
     if (position >= bufsize) {
-      bufsize += LSH_RL_BUFSIZE;
+      bufsize += MSH_RL_BUFSIZE;
       buffer = realloc(buffer, bufsize);
       if (!buffer) {
-        fprintf(stderr, "lsh: allocation error\n");
+        fprintf(stderr, "msh: allocation error\n");
         exit(EXIT_FAILURE);
       }
     }
@@ -147,36 +155,36 @@ char *lsh_read_line (void) {
  * @param  line
  * @return Null-terminated array of tokens
  */
-char **lsh_split_line (char *line) {
-  int bufsize = LSH_TOK_BUFSIZE;
+char **msh_split_line (char *line) {
+  int bufsize = MSH_TOK_BUFSIZE;
   int position = 0;
   char **tokens = malloc(bufsize * sizeof(char *));
   char *token;
   char **tokens_backup;
   
   if (!tokens) {
-    fprintf(stderr, "lsh: allocation error\n");
+    fprintf(stderr, "msh: allocation error\n");
     exit(EXIT_FAILURE);
   }
   
-  token = strtok(line, LSH_TOK_DELIM);
+  token = strtok(line, MSH_TOK_DELIM);
   while (token != NULL) {
     tokens[position] = token;
     position++;
     
     if (position >= bufsize) {
-      bufsize += LSH_TOK_BUFSIZE;
+      bufsize += MSH_TOK_BUFSIZE;
       tokens_backup = tokens;
       tokens = realloc(tokens, bufsize * sizeof(char *));
       
       if (tokens == NULL) {
         free(tokens_backup);
-        fprintf(stderr, "lsh: allocation error\n");
+        fprintf(stderr, "msh: allocation error\n");
         exit(EXIT_FAILURE);
       }
     }
     
-    token = strtok(NULL, LSH_TOK_DELIM); // TODO: may be bug, first param is null?
+    token = strtok(NULL, MSH_TOK_DELIM);
   }
   tokens[position] = NULL;
   

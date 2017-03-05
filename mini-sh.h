@@ -1,20 +1,27 @@
 #ifndef MINI_SHELL
 #define  MINI_SHELL
 
-#define LSH_RL_BUFSIZE 1024
-#define LSH_TOK_BUFSIZE 64
-#define LSH_TOK_DELIM " \t\r\n\a"
+#define MSH_RL_BUFSIZE 1024
+#define MSH_TOK_BUFSIZE 64
+#define MSH_TOK_DELIM " \t\r\n\a"
 
-int lsh_cd(char **args);
-int lsh_help(char **);
-int lsh_exit(char **);
+int msh_cd (char **args);
+int msh_help (char **);
+int msh_exit (char **);
 
-int lsh_num_builtins(void);
+// Number of builtions command(3 at the current moment)
+int msh_num_builtins (void);
 
-void lsh_loop (void);
+// Main shell loop
+void msh_loop (void);
 
-char *lsh_read_line(void);
+// Read line from stdin
+char *msh_read_line (void);
 
-char **lsh_split_line(char*);
+// Split line into null-terminated strings
+char **msh_split_line (char*);
+
+// Execute non built-in shell command
+int msh_execute (char **args);
 
 #endif // MINI_SHELL
