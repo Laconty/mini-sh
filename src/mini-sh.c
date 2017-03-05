@@ -18,7 +18,7 @@ char *builtin_str[] = {
   "exit"
 };
 
-int msh_num_builtins() {
+int msh_num_builtins(void) {
   return sizeof(builtin_str) / sizeof(char *);
 };
 
