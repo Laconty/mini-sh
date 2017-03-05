@@ -1,5 +1,5 @@
-CC=gcc
-target=minish
+CC = gcc
+target = minish
 SRC = $(wildcard src/*.c)
 
 $(target): $(SRC)
