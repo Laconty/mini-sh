@@ -1,10 +1,11 @@
-.PHONY: clean
 CC=gcc
 target=minish
+SRC = $(wildcard src/*.c)
 
-$(target): mini-sh.c mini-sh.h main.c
-	@echo "compiling..."
-	$(CC) -o $@ mini-sh.c main.c
+$(target): $(SRC)
+	$(CC) -o $@ $^
 
-clean:
-	rm $(target)
+clean: 
+	rm -f $(target)
+
+.PHONY: clean
