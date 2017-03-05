@@ -6,8 +6,10 @@
 #define LSH_TOK_DELIM " \t\r\n\a"
 
 int lsh_cd(char **args);
-int lsh_help(char **args);
-int lsh_exit(char **args);
+int lsh_help(char **);
+int lsh_exit(char **);
+
+int lsh_num_builtins(void);
 
 void lsh_loop (void);
 
@@ -15,4 +17,4 @@ char *lsh_read_line(void);
 
 char **lsh_split_line(char*);
 
-#endif
+#endif // MINI_SHELL
